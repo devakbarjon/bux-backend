@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.database import get_db
 from app.db.functions.configs import get_config
-from app.models.schemas.users import BaseUserInput, UserOut, BaseResponse, UserWithdrawIn
+from app.models.schemas.users import BaseUserInput, UserOut, BaseResponse, UserWithdrawIn, UserWithdrawOut
 from app.models.user import User
 from app.services.bot.bot_auth import authenticate_user
 
@@ -24,16 +24,11 @@ async def get_user(
     
     user: User = user.get("user")
     
-    return UserOut(
-        user_id=user.user_id,
-        lang=user.lang,
-        balance=user.balance,
-        adv_balance=user.adv_balance
-    )
+    return UserOut.from_orm(user)
 
 
-@router.post("/withdraw", response_model=BaseResponse)
-async def get_user(
+@router.post("/withdraw", response_model=UserWithdrawOut)
+async def user_withdraw(
         user_in: UserWithdrawIn,
         session: AsyncSession = Depends(get_db)
 ):
@@ -54,7 +49,6 @@ async def get_user(
     if user_ton_balance < config.min_withdraw:
         raise HTTPException(status_code=400, detail="Not enough diamond in balance.")
 
-    return BaseResponse(
-        success=True,
-        message="Withdraw processed successfully"
+    return UserWithdrawOut(
+        new_balance=user.balance
     )

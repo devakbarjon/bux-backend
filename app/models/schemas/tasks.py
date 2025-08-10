@@ -35,7 +35,7 @@ class TaskListResponse(BaseResponse):
     tasks: list[TaskListOut]
 
 
-class AddTaskIn(BaseResponse):
+class AddTaskIn(BaseModel):
     init_data: str = Field(..., description="Initialization data for authentication")
     link: str = Field("https://t.me/ton_bux_bot", description="Link to task resource")
     check_sub: bool = Field(..., description="Is resource should be checked")

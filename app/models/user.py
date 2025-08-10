@@ -14,6 +14,8 @@ class User(Base):
     lang = Column(String, nullable=True)
     balance = Column(BigInteger, default=0)
     adv_balance = Column(Numeric(precision=20, scale=4), default=0)
+    ref = Column(String, nullable=True)
+    ref_code = Column(String)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
@@ -27,11 +29,15 @@ class User(Base):
     transactions = relationship("Transaction", back_populates="user", cascade="all, delete-orphan")
 
     def __init__(self, 
-                 user_id: int, 
+                 user_id: int,
+                 ref_code: str,
+                 ref: str = None,
                  username: str = None, 
                  lang: str = None
                  ):
         self.user_id = user_id
+        self.ref_code = ref_code
+        self.ref = ref
         self.username = username
         self.lang = lang
 

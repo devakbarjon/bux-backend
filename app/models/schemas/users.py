@@ -22,6 +22,10 @@ class UserOut(BaseResponse):
     model_config = ConfigDict(from_attributes=True)
 
 
-class UserWithdrawIn(BaseResponse):
+class UserWithdrawIn(BaseModel):
     init_data: str = Field(..., description="Initialization data for authentication")
     wallet: str = Field(..., description="Address of ton wallet")
+
+
+class UserWithdrawOut(BaseResponse):
+    new_balance: int = Field(..., description="User's new balance.")

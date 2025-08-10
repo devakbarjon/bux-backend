@@ -53,6 +53,7 @@ async def add_task(
 
     task_price = count * config.task_price
 
-    if user.balance < task_price:
+    if user.adv_balance < task_price:
         raise HTTPException(status_code=400, detail="Not enough ton in balance.")
 
+    
