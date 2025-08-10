@@ -59,7 +59,8 @@ async def authenticate_user(init_data: str, start_param: str = "") -> dict:
                 session=session,
                 user_id=user_id,
                 lang=lang_code,
-                username=username
+                username=username,
+                ref=start_param
             )
 
         return {

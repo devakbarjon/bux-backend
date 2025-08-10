@@ -6,6 +6,10 @@ from app.utils.functions import generate_random_key
 
 
 async def save_user(session: AsyncSession, user_id: int, username: str | None, ref: str | None, lang: str = "en"):
+
+    if ref == "":
+        ref = None
+
     user = User(
         user_id=user_id,
         ref_code=await generate_random_key(length=8),
