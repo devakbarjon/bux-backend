@@ -16,6 +16,7 @@ class User(Base):
     adv_balance = Column(Numeric(precision=20, scale=4), default=0)
     ref = Column(String, nullable=True)
     ref_code = Column(String)
+    ref_income = Column(BigInteger, default=0)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 

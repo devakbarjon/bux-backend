@@ -19,6 +19,7 @@ class UserOut(BaseResponse):
     balance: int
     adv_balance: float
     ref_code: str
+    ref_income: int
 
     model_config = ConfigDict(from_attributes=True)
 
