@@ -18,6 +18,7 @@ class UserOut(BaseResponse):
     lang: Optional[str] = "en"
     balance: int
     adv_balance: float
+    ref_code: str
 
     model_config = ConfigDict(from_attributes=True)
 
