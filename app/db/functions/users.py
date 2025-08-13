@@ -39,4 +39,4 @@ async def update_user_balance(session: AsyncSession, user_id: int, amount: int) 
     user.balance += amount
     await session.commit()
     await session.refresh(user)
-    return user
+    return user.balance
