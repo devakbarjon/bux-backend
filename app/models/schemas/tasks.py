@@ -40,3 +40,7 @@ class AddTaskIn(BaseModel):
     link: str = Field("https://t.me/ton_bux_bot", description="Link to task resource")
     check_sub: bool = Field(..., description="Is resource should be checked")
     count: int = Field(..., description="Count of completion")
+
+class CheckTaskOut(BaseResponse):
+    task_id: int
+    new_balance: int

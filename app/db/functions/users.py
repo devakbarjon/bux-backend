@@ -29,3 +29,14 @@ async def get_user_by_id(session: AsyncSession, user_id: int) -> User:
     )
     user = result.scalars().first()
     return user
+
+
+async def update_user_balance(session: AsyncSession, user_id: int, amount: int) -> User:
+    user = await get_user_by_id(session, user_id)
+    if not user:
+        return None
+
+    user.balance += amount
+    await session.commit()
+    await session.refresh(user)
+    return user

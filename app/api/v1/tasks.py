@@ -1,9 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.database import get_db
 from app.db.functions.configs import get_config
-from app.db.functions.tasks import get_all_tasks
-from app.models.schemas.tasks import TaskListResponse, AddTaskIn
+from app.db.functions.tasks import add_user_to_task, get_all_tasks, save_task, get_task_by_id
+from app.db.functions.users import update_user_balance
+from app.models.schemas.tasks import TaskListResponse, AddTaskIn, TaskInput, CheckTaskOut
+from app.models.schemas.errors import ErrorResponse
 from app.models.schemas.users import BaseUserInput, BaseResponse
 from app.models.user import User
 from app.services.bot.bot_auth import authenticate_user
@@ -11,7 +13,7 @@ from app.services.bot.bot_auth import authenticate_user
 router = APIRouter()
 
 
-@router.post("/", response_model=TaskListResponse)
+@router.post("/", response_model=TaskListResponse | ErrorResponse)
 async def get_tasks(
         user_in: BaseUserInput,
         session: AsyncSession = Depends(get_db)
@@ -22,7 +24,10 @@ async def get_tasks(
     )
 
     if user.get("success") is False:
-        raise HTTPException(status_code=400, detail=user.get("message", "Authentication failed"))
+        return ErrorResponse(
+            code="auth_error",
+            message=user.get("message", "Authentication failed"),
+        )
 
     tasks = await get_all_tasks(
         session=session
@@ -31,7 +36,7 @@ async def get_tasks(
     return TaskListResponse(tasks=tasks)
 
 
-@router.post("/add", response_model=BaseResponse)
+@router.post("/add", response_model=BaseResponse | ErrorResponse)
 async def add_task(
         task_in: AddTaskIn,
         session: AsyncSession = Depends(get_db)
@@ -45,7 +50,10 @@ async def add_task(
     )
 
     if user.get("success") is False:
-        raise HTTPException(status_code=400, detail=user.get("message", "Authentication failed"))
+        return ErrorResponse(
+            code="auth_error",
+            message=user.get("message", "Authentication failed"),
+        )
 
     user: User = user.get("user")
 
@@ -54,6 +62,72 @@ async def add_task(
     task_price = count * config.task_price
 
     if user.adv_balance < task_price:
-        raise HTTPException(status_code=400, detail="Not enough ton in balance.")
+        return ErrorResponse(
+            code="insufficient_balance",
+            message="You do not have enough balance to add this task."
+        )
 
+    await save_task(
+        session=session,
+        user_id=user.user_id,
+        link=link,
+        title=task_in.title,
+        reward=task_in.reward,
+        type=task_in.type,
+        check_sub=check_sub
+    )
+
+
+@router.post("/check", response_model=CheckTaskOut | ErrorResponse)
+async def check_task(
+        task_in: TaskInput,
+        session: AsyncSession = Depends(get_db)
+):
+    init_data = task_in.init_data
+    task_id = task_in.task_id
+    user: dict = await authenticate_user(
+        init_data=init_data
+    )
+
+    if user.get("success") is False:
+        return ErrorResponse(
+            code="auth_error",
+            message=user.get("message", "Authentication failed"),
+        )
+
+    user: User = user.get("user")
+
+    task = await get_task_by_id(
+        session=session,
+        task_id=task_id
+    )
+
+    if not task:
+        return ErrorResponse(
+            code="task_not_found",
+            message="The requested task does not exist."
+        )
     
+    if user.user_id in task.users:
+        return ErrorResponse(
+            code="task_already_completed",
+            message="You have already completed this task."
+        )
+    
+    new_balance = await update_user_balance(
+        session=session,
+        user_id=user.user_id,
+        amount=task.reward
+    )
+
+    await add_user_to_task(
+        session=session,
+        task_id=task.id,
+        user_id=user.user_id
+    )
+
+    return CheckTaskOut(
+        message="Task completed successfully",
+        task_id=task.id,
+        new_balance=new_balance
+    )
