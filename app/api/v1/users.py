@@ -28,7 +28,7 @@ async def get_user(
     
     user: User = user.get("user")
     
-    return UserOut.from_orm(user)
+    return UserOut.model_validate(user)
 
 
 @router.post("/withdraw", response_model=UserWithdrawOut | ErrorResponse)

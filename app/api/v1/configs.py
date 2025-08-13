@@ -18,4 +18,4 @@ async def get_configs(session: AsyncSession = Depends(get_db)):
             message="The requested configuration does not exist."
         )
 
-    return ConfigOut.from_orm(config)
+    return ConfigOut.model_validate(config)
