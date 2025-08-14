@@ -1,12 +1,9 @@
 from decimal import Decimal
 from fastapi import APIRouter, Depends, Request
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.database import get_db
 from app.db.functions.users import get_user_by_id, update_user_adv_balance
 from app.db.functions.transactions import save_transaction, get_transaction_by_id
-from app.models.transaction import Transaction
-from app.models.user import User
 from app.core.config import settings
 from app.logging_config import logger
 from app.services.bot.bot_base import bot
