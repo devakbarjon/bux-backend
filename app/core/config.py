@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     bot_token: str
     bot_channel_id: int
     admin_chat_id: int
+    tonapi_key: str
     secret_key: str
     environment: str = ENV
 
