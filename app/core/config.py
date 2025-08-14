@@ -5,7 +5,7 @@ ENV = os.getenv("ENV", "development")  # default to development
 
 
 class Settings(BaseSettings):
-    app_name: str = "Gift Giveaway"
+    app_name: str = "Ton Bux"
     database_url: str
     bot_token: str
     bot_channel_id: int
