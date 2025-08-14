@@ -54,7 +54,7 @@ async def update_user_balance(session: AsyncSession, user_id: int, amount: int, 
     return user.balance
 
 
-async def update_user_adv_balance(session: AsyncSession, user_id: int, amount: int, increase: bool = True) -> User:
+async def update_user_adv_balance(session: AsyncSession, user_id: int, amount: int | float, increase: bool = True) -> User:
     user = await get_user_by_id(session, user_id)
     if not user:
         return None

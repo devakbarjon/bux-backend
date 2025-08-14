@@ -25,3 +25,10 @@ async def update_transaction_status(session: AsyncSession, transaction_id: str, 
     await session.commit()
     await session.refresh(transaction)
     return transaction
+
+
+async def get_transaction_by_id(session: AsyncSession, transaction_id: str) -> Transaction | None:
+    result = await session.execute(
+        select(Transaction).where(Transaction.transaction_id == transaction_id)
+    )
+    return result.scalars().first()
