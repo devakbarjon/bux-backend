@@ -16,7 +16,7 @@ router = APIRouter()
 async def ton_webhook(request: Request, session: AsyncSession = Depends(get_db)):
     payload = await request.json()
     query_params = dict(request.query_params)
-    print(payload, query_params)
+    logger.info(payload, query_params)
 
     if query_params.get("secret") != settings.secret_key:
         return {"status": "unauthorized"}
