@@ -45,6 +45,7 @@ async def ton_webhook(request: Request, session: AsyncSession = Depends(get_db))
 
         # 5. Extract needed data from details
         in_msg = details.get("in_msg", {})
+        logger.info(in_msg)
         comment = in_msg.get("message", "")
         sender = in_msg.get("source")
         nanotons = int(in_msg.get("value", 0))
