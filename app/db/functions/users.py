@@ -10,13 +10,17 @@ async def save_user(session: AsyncSession, user_id: int, username: str | None, r
     if ref == "":
         ref = None
 
-    if ref:
+    if ref and ref.startswith("r_"):
+        ref = ref.split("_", 1)[1]
         ref_user = await session.execute(
             select(User).where(User.ref_code == ref)
         )
         ref_user = ref_user.scalars().first()
         if not ref_user:
             ref = None
+
+    if lang not in ["en", "ru"]:
+        lang = "en"
 
 
     user = User(
