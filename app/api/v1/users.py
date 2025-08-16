@@ -18,8 +18,10 @@ async def get_user(
     session: AsyncSession = Depends(get_db)
 ):
     init_data = user_in.init_data
+    start_param = user_in.start_param
     user: dict = await authenticate_user(
-        init_data=init_data
+        init_data=init_data,
+        start_param=start_param
     )
 
     if user.get("success") is False:
