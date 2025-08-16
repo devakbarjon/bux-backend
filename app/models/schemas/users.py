@@ -20,6 +20,7 @@ class UserOut(BaseResponse):
     adv_balance: float
     ref_code: str
     ref_income: int
+    ref_count: Optional[int] = 0
 
     model_config = ConfigDict(from_attributes=True)
 

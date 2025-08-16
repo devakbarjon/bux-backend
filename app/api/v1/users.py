@@ -3,6 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.database import get_db
 from app.db.functions.configs import get_config
+from app.db.functions.users import get_user_refferals
 from app.models.schemas.errors import ErrorResponse
 from app.models.schemas.users import BaseUserInput, UserOut, UserWithdrawIn, UserWithdrawOut
 from app.models.user import User
@@ -13,7 +14,8 @@ router = APIRouter()
 
 @router.post("/", response_model=UserOut | ErrorResponse)
 async def get_user(
-    user_in: BaseUserInput
+    user_in: BaseUserInput,
+    session: AsyncSession = Depends(get_db)
 ):
     init_data = user_in.init_data
     user: dict = await authenticate_user(
@@ -28,7 +30,15 @@ async def get_user(
     
     user: User = user.get("user")
     
-    return UserOut.model_validate(user)
+    user_out = UserOut.model_validate(user)
+
+    user_out.ref_count = await get_user_refferals(
+        session=session,
+        ref_code=user.ref_code,
+        is_count=True
+    )
+
+    return user_out
 
 
 @router.post("/withdraw", response_model=UserWithdrawOut | ErrorResponse)

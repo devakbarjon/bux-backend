@@ -1,5 +1,5 @@
 from app.models.user import User
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.utils.functions import generate_random_key
@@ -66,3 +66,14 @@ async def update_user_adv_balance(session: AsyncSession, user_id: int, amount: i
     await session.commit()
     await session.refresh(user)
     return user.adv_balance
+
+
+async def get_user_refferals(session: AsyncSession, ref_code, is_count: bool = False):
+    query = select(User).where(User.ref == ref_code)
+
+    if is_count:
+        result = await session.execute(query.with_only_columns(func.count()))
+        return result.scalar_one()
+    else:
+        result = await session.execute(query)
+        return result.scalars().all()
