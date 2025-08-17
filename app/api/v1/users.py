@@ -72,11 +72,6 @@ async def user_withdraw(
         )
 
     user_ton_balance = user.balance / config.exchange_rate
-    if user_ton_balance < config.min_withdraw:
-        return ErrorResponse(
-            code="insufficient_balance",
-            message="Not enough diamond in balance.",
-        )
 
     if not wallet:
         return ErrorResponse(
