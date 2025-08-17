@@ -64,11 +64,23 @@ async def user_withdraw(
 
     config = await get_config(session=session)
 
+    if user.balance < config.min_withdraw:
+        return ErrorResponse(
+            code="insufficient_balance",
+            message="Not enough balance to withdraw.",
+        )
+
     user_ton_balance = user.balance / config.exchange_rate
     if user_ton_balance < config.min_withdraw:
         return ErrorResponse(
             code="insufficient_balance",
             message="Not enough diamond in balance.",
+        )
+
+    if not wallet:
+        return ErrorResponse(
+            code="invalid_wallet",
+            message="Invalid wallet address provided.",
         )
 
     return UserWithdrawOut(

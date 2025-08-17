@@ -12,6 +12,8 @@ class Settings(BaseSettings):
     admin_chat_id: int
     secret_key: str
     tonapi_key: str
+    mnemonic: str
+    ton_center_api_key: str
     environment: str = ENV
 
     class Config:
