@@ -4,6 +4,7 @@ from tonutils.wallet import (
 )
 
 from app.core.config import settings
+from app.logging_config import logger
 IS_TESTNET = False
 
 MNEMONIC = settings.mnemonic
@@ -19,16 +20,24 @@ class TonService:
         self.wallet = wallet
 
     async def get_wallet_balance(self):
-        """Get the balance of the wallet."""
-        return await self.wallet.get_balance()
+        try:
+            """Get the balance of the wallet."""
+            return await self.wallet.get_balance()
+        except Exception as e:
+            logger.error(f"Failed to get wallet balance: {e}")
+            return None
 
     async def send_transaction(self, to_address: str, amount: int):
-        """Send TON to another address."""
-        return await self.wallet.transfer(
-            destination=to_address,
-            amount=amount,
-            body="Payment | @ton_bux_bot",
-        )
+        try:
+            """Send TON to another address."""
+            return await self.wallet.transfer(
+                destination=to_address,
+                amount=amount,
+                body="Payment | @ton_bux_bot",
+            )
+        except Exception as e:
+            logger.error(f"Failed to send transaction: {e}")
+            return None
     
 
 TonServices = TonService()

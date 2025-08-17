@@ -8,6 +8,7 @@ from app.models.schemas.errors import ErrorResponse
 from app.models.schemas.users import BaseUserInput, UserOut, UserWithdrawIn, UserWithdrawOut
 from app.models.user import User
 from app.services.bot.bot_auth import authenticate_user
+from app.services.ton.transfer import TonServices
 
 router = APIRouter()
 
@@ -81,6 +82,17 @@ async def user_withdraw(
         return ErrorResponse(
             code="invalid_wallet",
             message="Invalid wallet address provided.",
+        )
+    
+    transfer = await TonServices.send_transaction(
+        to_address=wallet,
+        amount=user_ton_balance
+    )
+
+    if not transfer:
+        return ErrorResponse(
+            code="transfer_error",
+            message="Failed to process the withdrawal transaction.",
         )
 
     return UserWithdrawOut(
