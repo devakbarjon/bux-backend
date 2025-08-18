@@ -81,3 +81,15 @@ async def get_user_refferals(session: AsyncSession, ref_code, is_count: bool = F
     else:
         result = await session.execute(query)
         return result.scalars().all()
+    
+
+
+async def reset_user_balance(session: AsyncSession, user_id: int):
+    user = await get_user_by_id(session, user_id)
+    if not user:
+        return None
+
+    user.balance = 0
+    await session.commit()
+    await session.refresh(user)
+    return user

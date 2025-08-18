@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.database import get_db
 from app.db.functions.configs import get_config
-from app.db.functions.users import get_user_refferals
+from app.db.functions.users import get_user_refferals, reset_user_balance
 from app.models.schemas.errors import ErrorResponse
 from app.models.schemas.users import BaseUserInput, UserOut, UserWithdrawIn, UserWithdrawOut
 from app.models.user import User
@@ -89,6 +89,12 @@ async def user_withdraw(
             code="transfer_error",
             message="Failed to process the withdrawal transaction.",
         )
+    
+    # Reset user balance after successful withdrawal
+    await reset_user_balance(
+        session=session,
+        user_id=user.user_id
+    )
 
     return UserWithdrawOut(
         new_balance=user.balance
