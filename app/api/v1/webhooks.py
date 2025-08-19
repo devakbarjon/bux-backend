@@ -19,7 +19,7 @@ async def ton_webhook(request: Request, session: AsyncSession = Depends(get_db))
     query_params = dict(request.query_params)
 
     if query_params.get("secret") != settings.secret_key:
-        logger.warning("Unauthorized access attempt to TON webhook")
+        logger.warning("Unauthorized access attempt to TON webhook.")
         return {"status": "unauthorized"}
     
     if payload.get("event_type") == "account_tx":
