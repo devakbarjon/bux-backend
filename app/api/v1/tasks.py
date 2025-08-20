@@ -9,6 +9,8 @@ from app.models.schemas.errors import ErrorResponse
 from app.models.schemas.users import BaseUserInput, BaseResponse
 from app.models.user import User
 from app.services.bot.bot_auth import authenticate_user
+from app.services.bot.bot_check_sub import check_is_bot_admin
+from app.utils.functions import classify_telegram_link
 
 router = APIRouter()
 
@@ -67,13 +69,48 @@ async def add_task(
             message="You do not have enough balance to add this task."
         )
 
+    if not link.startswith("https://"):
+        return ErrorResponse(
+            code="invalid_link",
+            message="The provided link is invalid. It must start with 'https://'."
+        )
+    
+    link_type = await classify_telegram_link(link=link)
+
+    if link_type == "not_telegram":
+        return ErrorResponse(
+            code="invalid_telegram_link",
+            message="The provided link is not a valid Telegram link."
+        )
+    
+    if link_type == "unknown":
+        return ErrorResponse(
+            code="unknown_telegram_link",
+            message="The provided link is a Telegram link, but its type is unknown."
+        )
+    
+    if check_sub and link_type != "channel":
+        return ErrorResponse(
+            code="invalid_link_type",
+            message="Subscription check is only allowed for Telegram channels."
+        )
+    
+    if check_sub and link_type == "channel":
+        is_bot_admin = await check_is_bot_admin(channel_link=link)
+        if not is_bot_admin:
+            return ErrorResponse(
+                code="bot_not_admin",
+                message="The bot is not an admin in the specified channel."
+            )
+        
+
     await save_task(
         session=session,
         user_id=user.user_id,
         link=link,
-        title=task_in.title,
+        title="Default",
         reward=task_in.reward,
-        type=task_in.type,
+        type=link_type,
         check_sub=check_sub
     )
 
