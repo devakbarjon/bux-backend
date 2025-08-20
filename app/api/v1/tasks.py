@@ -3,8 +3,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.database import get_db
 from app.db.functions.configs import get_config
 from app.db.functions.tasks import add_user_to_task, get_all_tasks, save_task, get_task_by_id
-from app.db.functions.users import update_user_balance
-from app.models.schemas.tasks import TaskListResponse, AddTaskIn, TaskInput, CheckTaskOut
+from app.db.functions.users import update_user_adv_balance, update_user_balance
+from app.models.schemas.tasks import AddTaskOut, TaskListResponse, AddTaskIn, TaskInput, CheckTaskOut
 from app.models.schemas.errors import ErrorResponse
 from app.models.schemas.users import BaseUserInput, BaseResponse
 from app.models.user import User
@@ -38,7 +38,7 @@ async def get_tasks(
     return TaskListResponse(tasks=tasks)
 
 
-@router.post("/add", response_model=BaseResponse | ErrorResponse)
+@router.post("/add", response_model=AddTaskOut | ErrorResponse)
 async def add_task(
         task_in: AddTaskIn,
         session: AsyncSession = Depends(get_db)
@@ -103,15 +103,28 @@ async def add_task(
                 message="The bot is not an admin in the specified channel."
             )
         
+    new_adv_balance = await update_user_adv_balance(
+        session=session,
+        user_id=user.user_id,
+        amount=task_price,
+        increase=False
+    )
+        
 
-    await save_task(
+    task = await save_task(
         session=session,
         user_id=user.user_id,
         link=link,
-        title="Default",
-        reward=task_in.reward,
+        title="default",
+        reward=config.task_price - config.task_price / 100 * 40, # 60% of the task price
         type=link_type,
         check_sub=check_sub
+    )
+
+    return AddTaskOut(
+        message="Task added successfully",
+        new_adv_balance=new_adv_balance,
+        task_id=task.id
     )
 
 

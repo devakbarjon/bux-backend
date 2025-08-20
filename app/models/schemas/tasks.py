@@ -41,6 +41,11 @@ class AddTaskIn(BaseModel):
     check_sub: bool = Field(..., description="Is resource should be checked")
     count: int = Field(..., description="Count of completion")
 
+
+class AddTaskOut(BaseResponse):
+    new_adv_balance: int
+    task_id: int
+
 class CheckTaskOut(BaseResponse):
     task_id: int
     new_balance: int
