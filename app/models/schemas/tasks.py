@@ -43,8 +43,8 @@ class AddTaskIn(BaseModel):
 
 
 class AddTaskOut(BaseResponse):
-    new_adv_balance: int
-    task_id: int  | float
+    new_adv_balance: float
+    task_id: int
 
 class CheckTaskOut(BaseResponse):
     task_id: int
