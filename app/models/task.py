@@ -20,9 +20,9 @@ class Task(Base):
     type = Column(Text, nullable=False)
     check_sub = Column(Boolean, default=False)
     users = Column(ARRAY(BigInteger), default=list)
-
-    end_at = Column(DateTime, nullable=False)
+    opened_users = Column(ARRAY(BigInteger), default=list)
     created_at = Column(DateTime, server_default=func.now())
+    updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
 
     user = relationship("User", back_populates="tasks")
 
