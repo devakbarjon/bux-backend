@@ -83,12 +83,6 @@ async def add_task(
             message="The provided link is not a valid Telegram link."
         )
     
-    if link_type == "unknown":
-        return ErrorResponse(
-            code="unknown_telegram_link",
-            message="The provided link is a Telegram link, but its type is unknown."
-        )
-    
     if check_sub and link_type != "channel":
         return ErrorResponse(
             code="invalid_link_type",
@@ -116,7 +110,7 @@ async def add_task(
         user_id=user.user_id,
         link=link,
         title="default",
-        reward=config.task_price - int(config.task_price / 100 * 40 * config.exchange_rate), # 60% of the task price
+        reward=config.task_price - int(config.task_price / 100 * 40 * config.exchange_rate), # 60% of the task price * exchange rate
         type=link_type,
         check_sub=check_sub
     )

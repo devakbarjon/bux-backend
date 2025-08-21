@@ -39,4 +39,4 @@ async def classify_telegram_link(link: str) -> str:
     except Exception:
         pass
 
-    return "unknown"
+    return "channel"
