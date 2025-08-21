@@ -116,7 +116,7 @@ async def add_task(
         user_id=user.user_id,
         link=link,
         title="default",
-        reward=config.task_price - config.task_price / 100 * 40, # 60% of the task price
+        reward=config.task_price - int(config.task_price / 100 * 40 * config.exchange_rate), # 60% of the task price
         type=link_type,
         check_sub=check_sub
     )
