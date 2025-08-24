@@ -45,3 +45,15 @@ async def add_user_to_task(session: AsyncSession, task_id: int, user_id: int) ->
         await session.commit()
         await session.refresh(task)
     return task
+
+
+async def add_opened_user_to_task(session: AsyncSession, task_id: int, user_id: int) -> None:
+    task = await get_task_by_id(session, task_id)
+    if not task:
+        return None
+
+    if user_id not in task.opened_users:
+        task.opened_users += [user_id]
+        await session.commit()
+        await session.refresh(task)
+    return task

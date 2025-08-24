@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.database import get_db
 from app.db.functions.configs import get_config
-from app.db.functions.tasks import add_user_to_task, get_all_tasks, save_task, get_task_by_id
+from app.db.functions.tasks import add_opened_user_to_task, add_user_to_task, get_all_tasks, save_task, get_task_by_id
 from app.db.functions.users import update_user_adv_balance, update_user_balance
 from app.models.schemas.tasks import AddTaskOut, TaskListResponse, AddTaskIn, TaskInput, CheckTaskOut
 from app.models.schemas.errors import ErrorResponse
@@ -119,6 +119,53 @@ async def add_task(
         message="Task added successfully",
         new_adv_balance=new_adv_balance,
         task_id=task.id
+    )
+
+
+@router.post("/open", response_model=BaseResponse | ErrorResponse)
+async def open_task(
+        task_in: TaskInput,
+        session: AsyncSession = Depends(get_db)
+):
+    init_data = task_in.init_data
+    task_id = task_in.task_id
+    user: dict = await authenticate_user(
+        init_data=init_data
+    )
+
+    if user.get("success") is False:
+        return ErrorResponse(
+            code="auth_error",
+            message=user.get("message", "Authentication failed"),
+        )
+
+    user: User = user.get("user")
+
+    task = await get_task_by_id(
+        session=session,
+        task_id=task_id
+    )
+
+    if not task:
+        return ErrorResponse(
+            code="task_not_found",
+            message="The requested task does not exist."
+        )
+    
+    if user.user_id in task.users:
+        return ErrorResponse(
+            code="task_already_completed",
+            message="You have already completed this task."
+        )
+    
+    await add_opened_user_to_task(
+        session=session,
+        task_id=task.id,
+        user_id=user.user_id
+    )
+    
+    return BaseResponse(
+        message="Task opened."
     )
 
 
