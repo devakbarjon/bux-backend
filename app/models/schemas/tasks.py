@@ -1,11 +1,6 @@
 from pydantic import BaseModel, Field, ConfigDict
 
-
-class BaseResponse(BaseModel):
-    success: bool = True
-    message: str = "Operation successful"
-
-    model_config = ConfigDict(from_attributes=True)
+from .base import BaseResponse
 
 
 class TaskInput(BaseModel):

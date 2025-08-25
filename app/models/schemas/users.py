@@ -2,10 +2,7 @@ from typing import Optional
 
 from pydantic import BaseModel, Field, ConfigDict
 
-
-class BaseResponse(BaseModel):
-    success: bool = True
-    message: str = "Operation successful"
+from .base import BaseResponse
 
 
 class BaseUserInput(BaseModel):
