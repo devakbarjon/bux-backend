@@ -17,7 +17,7 @@ class TaskOut(BaseResponse):
 
 
 class TaskListOut(BaseModel):
-    id: int
+    id: int | str
     title: str
     link: str
     reward: int

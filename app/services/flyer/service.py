@@ -4,13 +4,27 @@ from app.core.config import settings
 
 class FlyerService:
     def __init__(self):
-        self.flyer = Flyer(api_key=settings.flyer_api_key)
+        self.flyer = Flyer(key=settings.flyer_api_key)
 
     async def get_tasks(self, user_id: int | str, language_code: str = None):
-        return await self.flyer.get_tasks(
+        all_tasks = await self.flyer.get_tasks(
             user_id=user_id,
             language_code=language_code
         )
+
+        sorted_tasks = []
+
+        for task in all_tasks:
+            if task["task"] == "subscribe channel":
+                sorted_tasks.append({
+                    "id": task["signature"],
+                    "title": task["name"] or "default",
+                    "link": task["link"],
+                    "reward": 10,
+                    "type": "flyer_sub",
+                })
+
+        return sorted_tasks
     
     async def check_task(self, user_id: int | str, signature: str):
         return await self.flyer.check_task(

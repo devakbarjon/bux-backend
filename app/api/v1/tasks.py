@@ -11,6 +11,7 @@ from app.models.user import User
 from app.services.bot.bot_auth import authenticate_user
 from app.services.bot.bot_check_sub import check_bot_subscription, check_is_bot_admin
 from app.utils.functions import classify_telegram_link
+from app.services.flyer.service import FlyerServices
 
 router = APIRouter()
 
@@ -38,6 +39,10 @@ async def get_tasks(
         is_available=True,
         user_id=user.user_id
     )
+
+    flyer_tasks = await FlyerServices.get_tasks(user_id=user.user_id)
+
+    tasks.extend(flyer_tasks)
 
     return TaskListResponse(tasks=tasks)
 
