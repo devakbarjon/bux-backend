@@ -2,7 +2,7 @@ import httpx
 from app.core.config import settings
 
 
-TONAPI_BASE = "https://tonapi.io/v2"  # Main TonAPI endpoint for fetching details
+TONAPI_BASE = "https://tonapi.io/v2"
 
 
 async def fetch_transaction_details(tx_hash: str):

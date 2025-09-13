@@ -9,7 +9,7 @@ from app.models.schemas.errors import ErrorResponse
 from app.models.schemas.users import BaseUserInput, BaseResponse
 from app.models.user import User
 from app.services.bot.bot_auth import authenticate_user
-from app.services.bot.bot_check_sub import check_is_bot_admin
+from app.services.bot.bot_check_sub import check_bot_subscription, check_is_bot_admin
 from app.utils.functions import classify_telegram_link
 
 router = APIRouter()
@@ -30,9 +30,13 @@ async def get_tasks(
             code="auth_error",
             message=user.get("message", "Authentication failed"),
         )
+    
+    user: User = user.get("user")
 
     tasks = await get_all_tasks(
-        session=session
+        session=session,
+        is_available=True,
+        user_id=user.user_id
     )
 
     return TaskListResponse(tasks=tasks)
@@ -110,7 +114,7 @@ async def add_task(
         user_id=user.user_id,
         link=link,
         title="default",
-        reward=config.task_price - int(config.task_price / 100 * 40) * config.exchange_rate, # 60% of the task price * exchange rate
+        reward=(config.task_price / 100 * 40) * config.exchange_rate, # 60% of the task price * exchange rate
         type=link_type,
         check_sub=check_sub
     )
@@ -204,6 +208,17 @@ async def check_task(
             code="task_already_completed",
             message="You have already completed this task."
         )
+    
+    if task.type == "channel" and task.check_sub:
+        is_subscribed = await check_bot_subscription(
+            user_id=user.user_id,
+            channel_id=task.link
+        )
+        if not is_subscribed:
+            return ErrorResponse(
+                code="not_subscribed",
+                message="You are not subscribed to the required channel."
+            )
     
     new_balance = await update_user_balance(
         session=session,

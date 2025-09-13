@@ -14,6 +14,7 @@ class Settings(BaseSettings):
     tonapi_key: str
     mnemonic: str
     ton_center_api_key: str
+    flyer_api_key: str
     environment: str = ENV
 
     class Config:

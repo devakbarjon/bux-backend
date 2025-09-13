@@ -27,11 +27,21 @@ async def get_task_by_id(session: AsyncSession, task_id: int) -> Task | None:
     return result.scalars().first()
 
 
-async def get_all_tasks(session: AsyncSession) -> list[Task]:
-    result = await session.execute(
-        select(Task).filter_by(status=True).order_by(Task.id)
-    )
-    tasks = result.scalars().all()
+async def get_all_tasks(session: AsyncSession, is_available: bool, user_id: int | str = None) -> list[Task]:
+    if not is_available:
+        result = await session.execute(
+            select(Task).filter_by(status=True).order_by(Task.id)
+        )
+        tasks = result.scalars().all()
+    else:
+        result = await session.execute(
+            select(Task)
+            .where(Task.status == True)
+            .where(~Task.users.any(user_id))  # only tasks where user_id is not in users
+            .order_by(Task.id)
+        )
+        tasks = result.scalars().all()
+
     return tasks
 
 
