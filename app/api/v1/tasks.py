@@ -40,7 +40,7 @@ async def get_tasks(
         user_id=user.user_id
     )
 
-    flyer_tasks = await FlyerServices.get_tasks(user_id=user.user_id)
+    flyer_tasks = await FlyerServices.get_tasks(user_id=user.user_id, language_code=user.lang)
 
     tasks.extend(flyer_tasks)
 
