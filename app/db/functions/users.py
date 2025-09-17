@@ -20,7 +20,7 @@ async def save_user(session: AsyncSession, user_id: int, username: str | None, r
             ref = None
 
     if lang not in ["en", "ru"]:
-        lang = "en"
+        lang = "ru"
 
 
     user = User(
@@ -92,4 +92,16 @@ async def reset_user_balance(session: AsyncSession, user_id: int):
     user.balance = 0
     await session.commit()
     await session.refresh(user)
+    return user
+
+
+async def complete_task_for_user(session: AsyncSession, user_id: int, task_id: int) -> User:
+    user = await get_user_by_id(session, user_id)
+    if not user:
+        return None
+
+    if str(task_id) not in user.tasks_completed:
+        user.tasks_completed += [str(task_id)]
+        await session.commit()
+        await session.refresh(user)
     return user

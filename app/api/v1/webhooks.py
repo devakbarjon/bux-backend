@@ -76,3 +76,10 @@ async def ton_webhook(request: Request, session: AsyncSession = Depends(get_db))
             logger.warning(f"Transaction {tx_hash} has no valid user ID in comment")
 
     return {"status": "ok"}
+
+
+@router.get("adsgram")
+async def adsgram_webhook(request: Request):
+    query_params = dict(request.query_params)
+    user_id = query_params.get("user_id")
+    return {"status": "ok"}

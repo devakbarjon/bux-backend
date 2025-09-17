@@ -44,3 +44,8 @@ class AddTaskOut(BaseResponse):
 class CheckTaskOut(BaseResponse):
     task_id: int
     new_balance: int
+
+
+class TraffyCheckIn(BaseModel):
+    init_data: str = Field(..., description="Initialization data for authentication")
+    token: str = Field(..., description="Traffy signed token")

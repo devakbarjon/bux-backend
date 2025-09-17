@@ -1,4 +1,5 @@
 from sqlalchemy import Column, String, DateTime, BigInteger, Numeric
+from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 
@@ -17,6 +18,7 @@ class User(Base):
     ref = Column(String, nullable=True)
     ref_code = Column(String)
     ref_income = Column(BigInteger, default=0)
+    tasks_completed = Column(ARRAY(String), default=list)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 

@@ -3,8 +3,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.database import get_db
 from app.db.functions.configs import get_config
 from app.db.functions.tasks import add_opened_user_to_task, add_user_to_task, get_all_tasks, save_task, get_task_by_id
-from app.db.functions.users import update_user_adv_balance, update_user_balance
-from app.models.schemas.tasks import AddTaskOut, TaskListResponse, AddTaskIn, TaskInput, CheckTaskOut
+from app.db.functions.users import update_user_adv_balance, update_user_balance, complete_task_for_user
+from app.models.schemas.tasks import AddTaskOut, TaskListResponse, AddTaskIn, TaskInput, CheckTaskOut, TraffyCheckIn
 from app.models.schemas.errors import ErrorResponse
 from app.models.schemas.users import BaseUserInput, BaseResponse
 from app.models.user import User
@@ -12,6 +12,7 @@ from app.services.bot.bot_auth import authenticate_user
 from app.services.bot.bot_check_sub import check_bot_subscription, check_is_bot_admin
 from app.utils.functions import classify_telegram_link
 from app.services.flyer.service import FlyerServices
+from app.services.traffy.service import TraffyServices
 
 router = APIRouter()
 
@@ -240,5 +241,128 @@ async def check_task(
     return CheckTaskOut(
         message="Task completed successfully",
         task_id=task.id,
+        new_balance=new_balance
+    )
+
+
+@router.post("/check_flyer", response_model=CheckTaskOut | ErrorResponse)
+async def check_flyer_task(
+        task_in: TaskInput,
+        session: AsyncSession = Depends(get_db)
+):
+    init_data = task_in.init_data
+    task_id = task_in.task_id
+    user: dict = await authenticate_user(
+        init_data=init_data
+    )
+
+    if user.get("success") is False:
+        return ErrorResponse(
+            code="auth_error",
+            message=user.get("message", "Authentication failed"),
+        )
+
+    user: User = user.get("user")
+
+    status = await FlyerServices.check_task(
+        user_id=user.user_id,
+        signature=task_id
+    )
+
+    if status == "incomplete":
+        return ErrorResponse(
+            code="task_incomplete",
+            message="The task is not completed."
+        )
+    
+    elif status == "abort":
+        return ErrorResponse(
+            code="task_abort",
+            message="You left the channel please join again."
+        )
+    
+    elif status == "unavailable":
+        return ErrorResponse(
+            code="task_unavailable",
+            message="The task is unavailable."
+        )
+    
+    elif status == "null":
+        return ErrorResponse(
+            code="task_not_found",
+            message="The requested task does not exist."
+        )
+    
+    elif status == "complete" or status == "waiting":
+
+        if str(task_id) in user.tasks_completed:
+            return ErrorResponse(
+                code="task_already_completed",
+                message="You have already completed this task."
+            )
+
+        await complete_task_for_user(
+            session=session,
+            user_id=user.user_id,
+            task_id=task_id
+        )
+
+        new_balance = await update_user_balance(
+            session=session,
+            user_id=user.user_id,
+            amount=10
+        )
+
+        return CheckTaskOut(
+            message="Task completed successfully",
+            task_id=task_id,
+            new_balance=new_balance
+        )
+    
+
+@router.post("/traffy_check", response_model=CheckTaskOut | ErrorResponse)
+async def traffy_check_task(
+        task_in: TraffyCheckIn,
+        session: AsyncSession = Depends(get_db)
+):
+    init_data = task_in.init_data
+    signed_token = task_in.token
+    user: dict = await authenticate_user(
+        init_data=init_data
+    )
+
+    if user.get("success") is False:
+        return ErrorResponse(
+            code="auth_error",
+            message=user.get("message", "Authentication failed"),
+        )
+
+    user: User = user.get("user")
+
+    verification = await TraffyServices.verify_signed_token(token=signed_token)
+
+    if not verification.get("success"):
+        return ErrorResponse(
+            code="invalid_token",
+            message="The provided token is invalid."
+        )
+    
+    data = verification.get("data", {})
+
+    await complete_task_for_user(
+        session=session,
+        user_id=user.user_id,
+        task_id=data.get("task_id", signed_token)
+    )
+
+    new_balance = await update_user_balance(
+        session=session,
+        user_id=user.user_id,
+        amount=10
+    )
+
+    return CheckTaskOut(
+        message="Task completed successfully",
+        task_id=data.get("task_id", signed_token),
         new_balance=new_balance
     )
