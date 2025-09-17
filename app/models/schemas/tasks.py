@@ -42,7 +42,7 @@ class AddTaskOut(BaseResponse):
     task_id: int
 
 class CheckTaskOut(BaseResponse):
-    task_id: int
+    task_id: int | str
     new_balance: int
 
 
