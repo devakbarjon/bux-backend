@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.database import get_db
-from app.db.functions.users import get_user_by_id, update_user_adv_balance
+from app.db.functions.users import get_user_by_id, update_user_adv_balance, update_user_balance
 from app.db.functions.transactions import save_transaction, get_transaction_by_id
 from app.core.config import settings
 from app.logging_config import logger
@@ -78,8 +78,34 @@ async def ton_webhook(request: Request, session: AsyncSession = Depends(get_db))
     return {"status": "ok"}
 
 
-@router.get("adsgram")
+@router.post("/flyer")
+async def flyer_webhook(request: Request, session: AsyncSession = Depends(get_db)):
+    query_params = dict(request.query_params)
+    secret = query_params.get("secret")
+    
+    if secret != settings.secret_key:
+        logger.warning("Unauthorized access attempt to Flyer webhook.")
+        return {"status": "unauthorized"}
+    
+    data = await request.json()
+
+    if data['type'] == 'new_status' and data['data']['status'] == 'abort':
+        # User left the channel, applying penalty
+        user_id = data['data']['user_id']
+        penalty_amount = 10
+        await update_user_balance(session, user_id, penalty_amount, increase=False)
+
+    return {"status": "ok"}
+
+
+@router.get("/adsgram")
 async def adsgram_webhook(request: Request):
     query_params = dict(request.query_params)
     user_id = query_params.get("user_id")
+    secret = query_params.get("secret")
+
+    if secret != settings.secret_key or not user_id:
+        logger.warning("Unauthorized access attempt to AdsGram webhook.")
+        return {"status": "unauthorized"}
+    
     return {"status": "ok"}
