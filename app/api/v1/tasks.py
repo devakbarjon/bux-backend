@@ -245,7 +245,7 @@ async def check_task(
     )
 
 
-@router.post("/check_flyer", response_model=CheckTaskOut | ErrorResponse)
+@router.post("/flyer_check", response_model=CheckTaskOut | ErrorResponse)
 async def check_flyer_task(
         task_in: TaskInput,
         session: AsyncSession = Depends(get_db)
