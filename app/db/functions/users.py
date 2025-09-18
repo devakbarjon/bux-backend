@@ -101,7 +101,7 @@ async def complete_task_for_user(session: AsyncSession, user_id: int, task_id: i
         return None
 
     if str(task_id) not in user.tasks_completed:
-        user.tasks_completed += [str(task_id)]
+        user.tasks_completed = user.tasks_completed + [str(task_id)]
         await session.commit()
         await session.refresh(user)
     return user
