@@ -17,6 +17,7 @@ class Settings(BaseSettings):
     flyer_api_key: str
     flyer_secret: str
     traffy_resource_id: str
+    adsgram_secret: str
     environment: str = ENV
 
     class Config:
