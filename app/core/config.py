@@ -15,6 +15,7 @@ class Settings(BaseSettings):
     mnemonic: str
     ton_center_api_key: str
     flyer_api_key: str
+    flyer_secret: str
     traffy_resource_id: str
     environment: str = ENV
 

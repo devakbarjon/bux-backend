@@ -5,11 +5,11 @@ from .base import BaseResponse
 
 class TaskInput(BaseModel):
     init_data: str = Field(..., description="Initialization data for authentication")
-    task_id: int = Field(..., description="Id of specific tasks")
+    task_id: int | str = Field(..., description="Id of specific tasks")
 
 
 class TaskOut(BaseResponse):
-    id: int
+    id: int | str
     title: str
     link: str
     reward: int
