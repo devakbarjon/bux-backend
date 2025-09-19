@@ -31,18 +31,21 @@ class User(Base):
 
     transactions = relationship("Transaction", back_populates="user", cascade="all, delete-orphan")
 
-    def __init__(self, 
-                 user_id: int,
-                 ref_code: str,
-                 ref: str = None,
-                 username: str = None, 
-                 lang: str = None
+    def __init__(
+                    self, 
+                    user_id: int,
+                    ref_code: str,
+                    ref: str = None,
+                    username: str = None, 
+                    lang: str = None,
+                    full_name: str = None
                  ):
         self.user_id = user_id
         self.ref_code = ref_code
         self.ref = ref
         self.username = username
         self.lang = lang
+        self.full_name = full_name
 
     def __repr__(self):
         return f"<User(id={self.user_id}, username={self.username})>"

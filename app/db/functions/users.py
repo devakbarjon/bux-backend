@@ -5,7 +5,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.utils.functions import generate_random_key
 
 
-async def save_user(session: AsyncSession, user_id: int, username: str | None, ref: str | None, lang: str = "en"):
+async def save_user(session: AsyncSession, user_id: int, username: str | None, ref: str | None, full_name: str |None,
+                     lang: str = "en"):
 
     if ref == "":
         ref = None
@@ -29,6 +30,7 @@ async def save_user(session: AsyncSession, user_id: int, username: str | None, r
         username=username,
         ref=ref,
         lang=lang,
+        full_name=full_name
     )
     session.add(user)
     await session.commit()

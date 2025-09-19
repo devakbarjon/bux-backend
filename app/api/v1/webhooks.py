@@ -82,8 +82,8 @@ async def ton_webhook(request: Request, session: AsyncSession = Depends(get_db))
 async def flyer_webhook(request: Request, session: AsyncSession = Depends(get_db)):
     query_params = dict(request.query_params)
     secret = query_params.get("secret")
-    
-    if secret != settings.secret_key:
+
+    if secret != settings.flyer_secret:
         logger.warning("Unauthorized access attempt to Flyer webhook.")
         return {"status": "unauthorized"}
     
@@ -104,7 +104,7 @@ async def adsgram_webhook(request: Request):
     user_id = query_params.get("user_id")
     secret = query_params.get("secret")
 
-    if secret != settings.secret_key or not user_id:
+    if secret != settings.adsgram_secret or not user_id:
         logger.warning("Unauthorized access attempt to AdsGram webhook.")
         return {"status": "unauthorized"}
     

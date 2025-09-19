@@ -46,6 +46,9 @@ async def authenticate_user(init_data: str, start_param: str = "") -> dict:
     user_id = tg_user.get("id")
     username = tg_user.get("username")
     lang_code = tg_user.get("language_code", "en")
+    full_name = tg_user.get("first_name", "")
+    if tg_user.get("last_name"):
+        full_name += f" {tg_user.get('last_name')}"
 
     # Authenticate the user (or create a new account)
     async for session in get_db():
@@ -60,7 +63,8 @@ async def authenticate_user(init_data: str, start_param: str = "") -> dict:
                 user_id=user_id,
                 lang=lang_code,
                 username=username,
-                ref=start_param
+                ref=start_param,
+                full_name=full_name
             )
 
         return {
