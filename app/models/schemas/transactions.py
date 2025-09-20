@@ -3,6 +3,9 @@ from pydantic import BaseModel, ConfigDict, field_serializer
 from .base import BaseResponse
 
 
+class TransIn(BaseModel):
+    init_data: str
+
 class TransListOut(BaseModel):
     id: int
     transaction_id: str | None
