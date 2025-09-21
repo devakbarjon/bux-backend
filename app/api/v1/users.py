@@ -103,7 +103,7 @@ async def user_withdraw(
 
 
 @router.post("/update_lang", response_model=BaseResponse | ErrorResponse)
-async def update_user_lang(
+async def update_user_language(
         user_in: UserLangIn,
         session: AsyncSession = Depends(get_db)
 ):
