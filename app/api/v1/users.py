@@ -3,9 +3,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.database import get_db
 from app.db.functions.configs import get_config
-from app.db.functions.users import get_user_refferals, reset_user_balance
+from app.db.functions.users import get_user_refferals, reset_user_balance, update_user_lang
 from app.models.schemas.errors import ErrorResponse
-from app.models.schemas.users import BaseUserInput, UserOut, UserWithdrawIn, UserWithdrawOut
+from app.models.schemas.base import BaseResponse
+from app.models.schemas.users import BaseUserInput, UserOut, UserWithdrawIn, UserWithdrawOut, UserLangIn
 from app.models.user import User
 from app.services.bot.bot_auth import authenticate_user
 from app.services.ton.transfer import TonServices
@@ -99,3 +100,37 @@ async def user_withdraw(
     return UserWithdrawOut(
         new_balance=user.balance
     )
+
+
+@router.post("/update_lang", response_model=BaseResponse | ErrorResponse)
+async def update_user_lang(
+        user_in: UserLangIn,
+        session: AsyncSession = Depends(get_db)
+):
+    init_data = user_in.init_data
+    new_lang = user_in.lang
+    user: dict = await authenticate_user(
+        init_data=init_data
+    )
+
+    if user.get("success") is False:
+        return ErrorResponse(
+            code="auth_error",
+            message=user.get("message", "Authentication failed"),
+        )
+
+    user: User = user.get("user")
+
+    updated_user = await update_user_lang(
+        session=session,
+        user_id=user.user_id,
+        new_lang=new_lang
+    )
+
+    if not updated_user:
+        return ErrorResponse(
+            code="update_error",
+            message="Failed to update user language.",
+        )
+
+    return BaseResponse(message="User language updated successfully.")

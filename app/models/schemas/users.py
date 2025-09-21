@@ -12,7 +12,7 @@ class BaseUserInput(BaseModel):
 
 class UserOut(BaseResponse):
     user_id: int
-    lang: Optional[str] = "en"
+    lang: Optional[str] = "ru"
     balance: int
     adv_balance: float
     ref_code: str
@@ -29,3 +29,8 @@ class UserWithdrawIn(BaseModel):
 
 class UserWithdrawOut(BaseResponse):
     new_balance: int = Field(..., description="User's new balance.")
+
+
+class UserLangIn(BaseModel):
+    init_data: str = Field(..., description="Initialization data for authentication")
+    lang: str = Field(..., description="New language code")  # e.g., 'en', 'ru'

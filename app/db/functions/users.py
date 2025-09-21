@@ -107,3 +107,17 @@ async def complete_task_for_user(session: AsyncSession, user_id: int, task_id: i
         await session.commit()
         await session.refresh(user)
     return user
+
+
+async def update_user_lang(session: AsyncSession, user_id: int, new_lang: str) -> User:
+    user = await get_user_by_id(session, user_id)
+    if not user:
+        return None
+
+    if new_lang not in ["en", "ru"]:
+        new_lang = "ru"
+
+    user.lang = new_lang
+    await session.commit()
+    await session.refresh(user)
+    return user

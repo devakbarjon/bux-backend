@@ -45,7 +45,7 @@ async def authenticate_user(init_data: str, start_param: str = "") -> dict:
     tg_user = json.loads(user_data)
     user_id = tg_user.get("id")
     username = tg_user.get("username")
-    lang_code = tg_user.get("language_code", "en")
+    lang_code = tg_user.get("language_code", "ru")
     full_name = tg_user.get("first_name", "")
     if tg_user.get("last_name"):
         full_name += f" {tg_user.get('last_name')}"
