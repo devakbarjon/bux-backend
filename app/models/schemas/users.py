@@ -18,6 +18,7 @@ class UserOut(BaseResponse):
     ref_code: str
     ref_income: int
     ref_count: Optional[int] = 0
+    ads_count: int
 
     model_config = ConfigDict(from_attributes=True)
 
