@@ -13,16 +13,17 @@ class FlyerService:
         )
 
         sorted_tasks = []
-
-        for task in all_tasks:
-            if task["task"] == "subscribe channel":
-                sorted_tasks.append({
-                    "id": task["signature"],
-                    "title": task["name"] or "default",
-                    "link": task["link"],
-                    "reward": 10,
-                    "type": "flyer_sub",
-                })
+        
+        if all_tasks is not None:
+            for task in all_tasks:
+                if task["task"] == "subscribe channel":
+                    sorted_tasks.append({
+                        "id": task["signature"],
+                        "title": task["name"] or "default",
+                        "link": task["link"],
+                        "reward": 10,
+                        "type": "flyer_sub",
+                    })
 
         return sorted_tasks
     
